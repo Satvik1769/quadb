@@ -7,6 +7,9 @@ const SearchScreen = ({ navigation }) => {
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+    const { width, height } = Dimensions.get('window');
+    const isLandscape = width > height;
+
   useEffect(() => {
     if (query.length > 2) {
       setIsLoading(true);
@@ -26,31 +29,37 @@ const SearchScreen = ({ navigation }) => {
 
   const renderMovieItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.movieItem}
+     style={[styles.movieItem, isLandscape ? styles.landscapeMovieItem : {}]}
       onPress={() => navigation.navigate('Details', { movie: item })}
     >
       <Image
-        source={
-          item.show.image?.original
-            ? { uri: item.show.image.original } // Use image from URI if available
-            : require('../assets/splash2.jpg') // Use fallback image if URI is not available
-        }
-        style={styles.movieImage}
-      />
+             source={ item.show.image?.original
+                                   ? { uri: item.show.image.original }
+                                   : require('../assets/splash2.jpg')}
+             style={[
+               styles.movieImage,
+               isLandscape
+                 ? { height: height * 0.4, width: width * 0.4 } // Larger height for landscape
+                 : { height: height * 0.3, width: width * 0.36 }, // Default for portrait
+             ]}
+             resizeMode="cover" // Ensures the image fits without distortion
+           />
       <Text style={styles.movieText}>{item.show.name}</Text>
     </TouchableOpacity>
   );
 
   return (
     <ScrollView style={styles.container}>
+    <View styles={{flex:1, alignItems:"center"}}>
       <TextInput
-        style={styles.searchInput}
+           style={[styles.searchInput, { maxWidth: isLandscape ? '40%' : '80%' }]} // Adjust width dynamically
         placeholder="Search for movies..."
         placeholderTextColor="#888"
         value={query}
         onChangeText={(text) => setQuery(text)}
         autoCapitalize="words"
       />
+      </View>
 
       {isLoading ? (
         <Text style={styles.loadingText}>Loading...</Text>
@@ -59,9 +68,10 @@ const SearchScreen = ({ navigation }) => {
           data={movies}
           renderItem={renderMovieItem}
           keyExtractor={(item, index) => index.toString()}
-          numColumns={2}
           columnWrapperStyle={styles.row}
           showsVerticalScrollIndicator={false}
+                    numColumns={2}
+
         />
       )}
     </ScrollView>
@@ -70,11 +80,12 @@ const SearchScreen = ({ navigation }) => {
 
 const { width, height } = Dimensions.get('window');
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    paddingTop: 20,
+    paddingTop: 10,
   },
   searchInput: {
     height: 50,
@@ -82,9 +93,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     paddingHorizontal: 15,
     borderRadius: 25,
-    marginTop: 10,
-    marginHorizontal: 10,
+    marginVertical: 10,
     fontSize: 16,
+    alignSelf: 'center', // Centers the TextInput horizontally
+    width: width > 750 ? '50%' : '80%', // Adjust width dynamically based on screen size
+    maxWidth: 750, // Ensures a maximum width for large screens
   },
   loadingText: {
     color: '#fff',
@@ -114,5 +127,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 });
+
 
 export default SearchScreen;

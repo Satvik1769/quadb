@@ -17,6 +17,9 @@ const HomeScreen = ({ navigation }) => {
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // Track loading state
 
+   const { width, height } = Dimensions.get('window');
+    const isPortrait = width < height;
+
   useEffect(() => {
     axios.get('https://api.tvmaze.com/search/shows?q=all')
       .then((response) => {
@@ -25,7 +28,6 @@ const HomeScreen = ({ navigation }) => {
       })
       .catch(() => setIsLoading(false)); // Handle error and stop loading
   }, []);
-
   // Render each carousel item
   const renderCarouselItem = ({ item }) => {
     return (
@@ -39,7 +41,13 @@ const HomeScreen = ({ navigation }) => {
               ? { uri: item.show.image.original }
               : require('../assets/splash2.jpg') // Fallback image
           }
-          style={styles.carouselImage}
+          style={[
+                    styles.carouselImage,
+                    {
+                      aspectRatio: isPortrait ? 3 / 4 : 16 / 9, // Adjust aspect ratio based on orientation
+                    },
+                  ]}
+                  resizeMode="cover"
         />
       </TouchableOpacity>
     );
